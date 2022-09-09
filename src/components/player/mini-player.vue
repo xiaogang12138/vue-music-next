@@ -3,15 +3,19 @@
     <div
       class="mini-player"
       v-show="!fullScreen"
+      @click="showNormalPlayer"
     >
       <div class="cd-wrapper">
         <div
+          ref="cdRef"
           class="cd"
         >
           <img
+            ref="cdImageRef"
             width="40"
             height="40"
             :src="currentSong.pic"
+            :class="cdCls"
           >
         </div>
       </div>
@@ -26,6 +30,7 @@
 <script>
   import { useStore } from 'vuex'
   import { computed } from 'vue'
+  import useCd from './use-cd'
 
   export default {
     name:'mini-play',
@@ -33,6 +38,23 @@
       const store = useStore()
       const fullScreen = computed(()=>store.state.fullScreen)
       const currentSong = computed(()=>store.getters.currentSong)
+      
+      const { cdCls,cdRef,cdImageRef } = useCd()
+
+      function showNormalPlayer(){
+        store.commit('setFullScreen',true)
+      }
+
+      return {
+        fullScreen,
+        currentSong,
+        showNormalPlayer,
+        //cd
+        cdCls,
+        cdRef,
+        cdImageRef
+      }
+
     }
   }
 </script>

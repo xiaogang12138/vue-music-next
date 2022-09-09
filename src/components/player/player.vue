@@ -1,6 +1,7 @@
 <template>
   <div
     class="player"
+    v-show="playlist.length"
   >
       <div
         class="normal-player"
@@ -106,6 +107,7 @@
           </div>
         </div>
       </div>
+      <mini-player></mini-player>
       <audio 
       ref="audioRef"
       @pause="pause"
@@ -127,15 +129,18 @@
   import useMiddleInteractive from './use-middle-interactive'
   import ProgressBar from './progress-bar.vue'
   import Scroll from '@/components/base/scroll/scroll'
+  import MiniPlayer from './mini-player.vue'
   import { formatTime } from '@/assets/js/util'
   import { PLAY_MODE } from '@/assets/js/constant'
+
 
   export default {
     name: 'player',
     components:{
-      ProgressBar,
-      Scroll
-    },
+    ProgressBar,
+    Scroll,
+    MiniPlayer
+},
     setup(){
       //data
       const audioRef = ref(null)
@@ -310,6 +315,7 @@
         audioRef,
         fullScreen,
         currentTime,
+        playlist,
         currentSong,
         playIcon,
         disableCls,
