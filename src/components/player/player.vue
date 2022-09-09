@@ -3,6 +3,13 @@
     class="player"
     v-show="playlist.length"
   >
+    <transition
+    name="normal"
+    @enter="enter"
+    @after-enter="afterEnter"
+    @leave="leave"
+    @after-leave="afterLeave"
+  >
       <div
         class="normal-player"
         v-show="fullScreen"
@@ -31,6 +38,7 @@
             :style="middleLStyle"
           >
             <div
+              ref="cdWrapperRef"
               class="cd-wrapper"
             >
               <div
@@ -108,6 +116,7 @@
           </div>
         </div>
       </div>
+    </transition>
       <mini-player
         :progress="progress"
         :toggle-play="togglePlay"
@@ -131,6 +140,7 @@
   import useCd from './use-cd'
   import useLyric from './use-lyric'
   import useMiddleInteractive from './use-middle-interactive'
+  import useAnimation from './use-animation'
   import ProgressBar from './progress-bar.vue'
   import Scroll from '@/components/base/scroll/scroll'
   import MiniPlayer from './mini-player.vue'
@@ -168,6 +178,8 @@
       const {cdCls,cdRef,cdImageRef}=useCd()
       const {currentLyric,currentLineNum,playingLyric,pureMusicLyric,playLyric,stopLyric,lyricScrollRef,lyricListRef} = useLyric({songReady,currentTime})
       const {currentShow,middleLStyle,middleRStyle,onMiddleTouchStart,onMiddleTouchMove,onMiddleTouchEnd}=useMiddleInteractive()
+      const { cdWrapperRef,enter,afterEnter,leave,afterLeave } = useAnimation()
+      
       //computed
       const playlist=computed(()=>store.state.playlist)
 
@@ -368,7 +380,13 @@
         middleRStyle,
         onMiddleTouchStart,
         onMiddleTouchMove,
-        onMiddleTouchEnd
+        onMiddleTouchEnd,
+        //animation
+        cdWrapperRef,
+        enter,
+        afterEnter,
+        leave,
+        afterLeave
       }
     }
   }
