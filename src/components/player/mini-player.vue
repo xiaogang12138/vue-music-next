@@ -24,9 +24,17 @@
 </template>
 
 <script>
- export default {
-  
- }
+  import { useStore } from 'vuex'
+  import { computed } from 'vue'
+
+  export default {
+    name:'mini-play',
+    setup(){
+      const store = useStore()
+      const fullScreen = computed(()=>store.state.fullScreen)
+      const currentSong = computed(()=>store.getters.currentSong)
+    }
+  }
 </script>
 
 <style lang="scss" scoped>
