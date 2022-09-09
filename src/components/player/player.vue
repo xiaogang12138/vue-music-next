@@ -81,6 +81,7 @@
             <span class="time time-l">{{formatTime(currentTime)}}</span>
             <div class="progress-bar-wrapper">
               <progress-bar
+                ref="barRef"
                :progress="progress"
                @progress-changing="onProgressChanging"
                @progress-changed="onProgressChanged"
@@ -96,7 +97,7 @@
               <i @click="prev" class="icon-prev"></i>
             </div>
             <div class="icon i-center" :class="disableCls">
-              <i @click="togalePlay" :class="playIcon"></i>
+              <i @click="togglePlay" :class="playIcon"></i>
             </div>
             <div class="icon i-right" :class="disableCls">
               <i @click="next" class="icon-next"></i>
@@ -107,7 +108,10 @@
           </div>
         </div>
       </div>
-      <mini-player></mini-player>
+      <mini-player
+        :progress="progress"
+        :toggle-play="togglePlay"
+      ></mini-player>
       <audio 
       ref="audioRef"
       @pause="pause"
@@ -121,7 +125,7 @@
 
 <script>
   import { useStore } from 'vuex'
-  import { computed,watch,ref } from 'vue'
+  import { computed,watch,ref,nextTick } from 'vue'
   import useMode from './use-mode'
   import useFavorite from './use-favorite'
   import useCd from './use-cd'
@@ -144,6 +148,7 @@
     setup(){
       //data
       const audioRef = ref(null)
+      const barRef = ref(null)
       const songReady = ref(false)
       const currentTime = ref(0)
       let progressChanging = false
@@ -205,12 +210,19 @@
         }
       })
 
+      watch(fullScreen,async (newFullScreen)=>{
+        if(newFullScreen){
+          await nextTick()
+          barRef.value.setOffset(progress.value)
+        }
+      })
+
       //methods
       function goBack(){
         store.commit('setFullScreen',false)
       }
 
-      function togalePlay(){
+      function togglePlay(){
         if(!songReady.value){
           return
         }
@@ -313,6 +325,7 @@
 
       return {
         audioRef,
+        barRef,
         fullScreen,
         currentTime,
         playlist,
@@ -321,7 +334,7 @@
         disableCls,
         progress,
         goBack,
-        togalePlay,
+        togglePlay,
         pause,
         prev,
         next,

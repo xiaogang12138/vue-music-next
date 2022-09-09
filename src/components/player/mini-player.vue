@@ -19,10 +19,32 @@
           >
         </div>
       </div>
-      <div>
-        <h2 class="name">{{currentSong.name}}</h2>
-        <p class="desc">{{currentSong.singer}}</p>
+      <div
+        ref="sliderWrapperRef"
+        class="slider-wrapper"
+      >
+        <div class="slider-group">
+          <div
+            class="slider-page"
+            v-for="song in playlist"
+            :key="song.id"
+          >
+            <h2 class="name">{{song.name}}</h2>
+            <p class="desc">{{song.singer}}</p>
+          </div>
+        </div>
       </div>
+        <div class="control">
+          <progress-circle
+            :radius="32"
+            :progress="progress"
+          >
+            <i 
+              class="icon-mini" 
+              :class="miniPlayIcon"
+              @click.stop="togglePlay"></i>  
+          </progress-circle>
+        </div>
       </div>
   </transition>
 </template>
@@ -31,32 +53,55 @@
   import { useStore } from 'vuex'
   import { computed } from 'vue'
   import useCd from './use-cd'
+  import useMiniSlider from './use-mini-slider'
+  import ProgressCircle from './progress-circle.vue'
 
   export default {
-    name:'mini-play',
-    setup(){
-      const store = useStore()
-      const fullScreen = computed(()=>store.state.fullScreen)
-      const currentSong = computed(()=>store.getters.currentSong)
-      
-      const { cdCls,cdRef,cdImageRef } = useCd()
+    name: "mini-play",
+    components:{
+      ProgressCircle
+    }, 
+    props: {
+      progress:{
+        type: Number,
+        default: 0
+      },
+      togglePlay: Function
+    },
+    setup() {
+        const store = useStore();
+        const fullScreen = computed(() => store.state.fullScreen);
+        const currentSong = computed(() => store.getters.currentSong);
+        const playing = computed(() => store.state.playing)
+        const playlist = computed(()=>store.state.playlist)
 
-      function showNormalPlayer(){
-        store.commit('setFullScreen',true)
-      }
+        
+        const { cdCls, cdRef, cdImageRef } = useCd();
+        const { sliderWrapperRef } = useMiniSlider()
 
-      return {
-        fullScreen,
-        currentSong,
-        showNormalPlayer,
-        //cd
-        cdCls,
-        cdRef,
-        cdImageRef
-      }
-
+        const miniPlayIcon = computed(() => {
+        return playing.value ? 'icon-pause-mini' : 'icon-play-mini'
+      })
+        
+        function showNormalPlayer() {
+            store.commit("setFullScreen", true);
+        }
+        
+        return {
+            fullScreen,
+            currentSong,
+            playlist,
+            miniPlayIcon ,
+            showNormalPlayer,
+            //cd
+            cdCls,
+            cdRef,
+            cdImageRef,
+            //mini-slider
+            sliderWrapperRef
+        }
     }
-  }
+}
 </script>
 
 <style lang="scss" scoped>
