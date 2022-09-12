@@ -16,13 +16,20 @@
               >
               </i>
               <span class="text">{{modeText}}</span>
+              <span class="clear" @click="showConfirm">
+                <i class="icon-clear"></i>
+              </span>
             </h1>
           </div>
           <scroll
             ref="scrollRef"
             class="list-content"
           >
-            <ul ref="listRef">
+          <transition-group
+              ref="listRef"
+              name="list"
+              tag="ul"
+            >
               <li
                 class="item"
                 v-for="song in sequenceList"
@@ -37,13 +44,26 @@
                 <span class="favorite" @click.stop="toggleFavorite(song)">
                   <i :class="getFavoriteIcon(song)"></i>
                 </span>
+                <span
+                  class="delete"
+                  @click.stop="removeSong(song)"
+                  :class="{'disable': removing}"
+                >
+                  <i class="icon-delete"></i>
+                </span>
               </li>
-            </ul>
+            </transition-group>
           </scroll>
           <div class="list-footer" @click.stop="hide">
             <span>关闭</span>
           </div>
         </div>
+        <confirm
+          ref="confirmRef"
+          @confirm="confirmClear"
+          text="是否清空播放列表？"
+          confirm-btn-text="清空"
+        ></confirm>
       </div>
     </transition>
   </teleport>
@@ -55,16 +75,20 @@
   import { useStore } from 'vuex'
   import useMode from './use-mode'
   import useFavorite from './use-favorite'
+  import Confirm from '@/components/base/confirm/confirm.vue'
 
   export default {
     name: 'playlist',
     components: {
-      Scroll
-    },
+    Scroll,
+    Confirm
+},
     setup() {
       const visible = ref(false)
       const scrollRef = ref(null)
+      const removing = ref(false)
       const listRef = ref(null)
+      const confirmRef = ref(null)
 
       const store = useStore()
       const playlist = computed(()=>store.state.playlist)
@@ -74,8 +98,8 @@
       const { modeIcon, changeMode, modeText } = useMode()
       const { getFavoriteIcon, toggleFavorite } = useFavorite()
 
-      watch(currentSong,async()=>{
-        if(!visible.value){
+      watch(currentSong,async(newSong)=>{
+        if(!visible.value || newSong.id){
           return
         }
         await nextTick()
@@ -118,14 +142,42 @@
         const index = sequenceList.value.findIndex((song)=>{
           return currentSong.value.id === song.id
         })
-        const target = listRef.value.children[index]
+        if(index === -1){
+          return
+        }
+        const target = listRef.value.$el.children[index]
         
         scrollRef.value.scroll.scrollToElement(target, 300)
       }
 
+      function removeSong(song){
+        if (removing.value) {
+          return
+        }
+        removing.value = true
+        store.dispatch('removeSong',song)
+        if(!playlist.value.length){
+          hide()
+        }
+        setTimeout(() => {
+          removing.value = false
+        }, 300)
+      }
+
+      function showConfirm(){
+        confirmRef.value.show()
+      }
+
+      function confirmClear(){
+        store.dispatch('clearSongList')
+        hide()
+      }
+
       return {
         visible,
+        removing,
         listRef,
+        confirmRef,
         playlist,
         sequenceList,
         getCurrentIcon,
@@ -133,6 +185,9 @@
         hide,
         show,
         selectItem,
+        removeSong,
+        showConfirm,
+        confirmClear,
         //mode
         modeIcon,
         changeMode,
