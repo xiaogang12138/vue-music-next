@@ -1,8 +1,8 @@
 <template>
   <div class="singer" v-loading="!singers.length">
     <index-list
-     :data="singers"
-     @select="selectSinger"
+      :data="singers"
+      @select="selectSinger"
     ></index-list>
     <router-view v-slot="{ Component }">
       <transition appear name="slide">
@@ -14,43 +14,42 @@
 
 <script>
   import { getSingerList } from '@/service/singer'
-  import IndexList from '@/components/index-list/index-list.vue'
+  import IndexList from '@/components/index-list/index-list'
   import storage from 'good-storage'
   import { SINGER_KEY } from '@/assets/js/constant'
 
   export default {
     name: 'singer',
-    components:{
+    components: {
       IndexList
     },
-    data(){
-      return{
-        singers:[],
-        selectedSinger
-:null      }
+    data() {
+      return {
+        singers: [],
+        selectedSinger: null
+      }
     },
-    async created(){
-      const result=await getSingerList()
-      this.singers=result.singers
+    async created() {
+      const result = await getSingerList()
+      this.singers = result.singers
     },
-    methods:{
-      selectSinger(singer){
-        this.selectedSinger=singer
+    methods: {
+      selectSinger(singer) {
+        this.selectedSinger = singer
         this.cacheSinger(singer)
         this.$router.push({
-          path:`/singer/${singer.mid}`
+          path: `/singer/${singer.mid}`
         })
       },
-      cacheSinger(singer){
-        storage.session.set(SINGER_KEY,singer)
+      cacheSinger(singer) {
+        storage.session.set(SINGER_KEY, singer)
       }
     }
   }
-    
 </script>
 
 <style lang="scss" scoped>
-  .singer{
+  .singer {
     position: fixed;
     width: 100%;
     top: 88px;

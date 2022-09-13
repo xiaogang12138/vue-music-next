@@ -9,7 +9,9 @@ import noResultDirective from './components/base/no-result/directive'
 //引入全局变量样式
 import '@/assets/scss/index.scss'
 
-createApp(App).use(store).use(router).use(lazyPlugin,{
-    loading:require('@/assets/images/default.png')
-}).directive('loading',loadingDirective).directive('no-result',noResultDirective).mount('#app')
+
+
+createApp(App).use(store).use(router).use(lazyPlugin, {
+    loading: require('@/assets/images/default.png')
+  }).directive('loading', loadingDirective).directive('no-result', noResultDirective).mount('#app')
 
