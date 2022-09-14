@@ -1,4 +1,4 @@
-import { PLAY_MODE, SEARCH_KEY } from '@/assets/js/constant'
+import { PLAY_MODE, SEARCH_KEY} from '@/assets/js/constant'
 import { load } from '@/assets/js/array-store'
 
 const state = {

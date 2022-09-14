@@ -25,7 +25,7 @@
             ref="scrollRef"
             class="list-content"
           >
-          <transition-group
+            <transition-group
               ref="listRef"
               name="list"
               tag="ul"
@@ -54,7 +54,13 @@
               </li>
             </transition-group>
           </scroll>
-          <div class="list-footer" @click.stop="hide">
+          <div class="list-add">
+            <div class="add" @click="showAddSong">
+              <i class="icon-add"></i>
+              <span class="text">添加歌曲到队列</span>
+            </div>
+          </div>
+          <div class="list-footer" @click="hide">
             <span>关闭</span>
           </div>
         </div>
@@ -64,6 +70,7 @@
           text="是否清空播放列表？"
           confirm-btn-text="清空"
         ></confirm>
+        <add-song ref="addSongRef"></add-song>
       </div>
     </transition>
   </teleport>
@@ -71,35 +78,38 @@
 
 <script>
   import Scroll from '@/components/base/scroll/scroll.vue'
+  import Confirm from '@/components/base/confirm/confirm.vue'
   import { ref, computed, nextTick, watch } from 'vue'
   import { useStore } from 'vuex'
   import useMode from './use-mode'
   import useFavorite from './use-favorite'
-  import Confirm from '@/components/base/confirm/confirm.vue'
+  import AddSong from '../add-song/add-song.vue'
 
   export default {
     name: 'playlist',
     components: {
+    Confirm,
     Scroll,
-    Confirm
+    AddSong
 },
     setup() {
       const visible = ref(false)
-      const scrollRef = ref(null)
       const removing = ref(false)
+      const scrollRef = ref(null)
       const listRef = ref(null)
       const confirmRef = ref(null)
+      const addSongRef = ref(null)
 
       const store = useStore()
-      const playlist = computed(()=>store.state.playlist)
-      const sequenceList = computed(()=>store.state.sequenceList)
-      const currentSong = computed(()=>store.getters.currentSong)
+      const playlist = computed(() => store.state.playlist)
+      const sequenceList = computed(() => store.state.sequenceList)
+      const currentSong = computed(() => store.getters.currentSong)
 
-      const { modeIcon, changeMode, modeText } = useMode()
+      const { modeIcon, modeText, changeMode } = useMode()
       const { getFavoriteIcon, toggleFavorite } = useFavorite()
 
-      watch(currentSong,async(newSong)=>{
-        if(!visible.value || newSong.id){
+      watch(currentSong, async (newSong) => {
+        if (!visible.value || !newSong.id) {
           return
         }
         await nextTick()
@@ -112,7 +122,6 @@
         }
       }
 
-
       async function show() {
         visible.value = true
 
@@ -121,42 +130,42 @@
         scrollToCurrent()
       }
 
-      function hide(){
+      function hide() {
         visible.value = false
       }
 
-      function selectItem(song){
-        const index = playlist.value.findIndex((item)=>{
+      function selectItem(song) {
+        const index = playlist.value.findIndex((item) => {
           return song.id === item.id
         })
 
-        store.commit('setCurrentIndex',index)
-        store.commit('setPlayingState',true)
+        store.commit('setCurrentIndex', index)
+        store.commit('setPlayingState', true)
       }
 
       function refreshScroll() {
         scrollRef.value.scroll.refresh()
       }
 
-      function scrollToCurrent(){
-        const index = sequenceList.value.findIndex((song)=>{
+      function scrollToCurrent() {
+        const index = sequenceList.value.findIndex((song) => {
           return currentSong.value.id === song.id
         })
-        if(index === -1){
+        if (index === -1) {
           return
         }
         const target = listRef.value.$el.children[index]
-        
+
         scrollRef.value.scroll.scrollToElement(target, 300)
       }
 
-      function removeSong(song){
+      function removeSong(song) {
         if (removing.value) {
           return
         }
         removing.value = true
-        store.dispatch('removeSong',song)
-        if(!playlist.value.length){
+        store.dispatch('removeSong', song)
+        if (!playlist.value.length) {
           hide()
         }
         setTimeout(() => {
@@ -164,35 +173,41 @@
         }, 300)
       }
 
-      function showConfirm(){
+      function showConfirm() {
         confirmRef.value.show()
       }
 
-      function confirmClear(){
+      function confirmClear() {
         store.dispatch('clearSongList')
         hide()
+      }
+
+      function showAddSong() {
+        addSongRef.value.show()
       }
 
       return {
         visible,
         removing,
+        scrollRef,
         listRef,
         confirmRef,
+        addSongRef,
         playlist,
         sequenceList,
         getCurrentIcon,
-        scrollRef,
-        hide,
         show,
+        hide,
         selectItem,
         removeSong,
         showConfirm,
         confirmClear,
-        //mode
+        showAddSong,
+        // mode
         modeIcon,
-        changeMode,
         modeText,
-        //favorite
+        changeMode,
+        // favorite
         getFavoriteIcon,
         toggleFavorite
       }
